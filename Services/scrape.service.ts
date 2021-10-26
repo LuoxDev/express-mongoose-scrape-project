@@ -3,8 +3,9 @@ import {productTypes} from '../Enums/productTypes.enum';
 import {ScrapeLinks} from '../Enums/scrapeLinks.enum';
 import Product, {IProduct} from '../Models/product.model';
 import Article from '../Models/article.model';
+import {importScrapedProducts} from "../Controllers/product.controller";
 
-export async function scrapeMostRecentProducts() {
+export async function scrapeMostRecentProductsFromTweakers() {
   //Currently grabbing 5 most recent products
   const numberOfProducts = 5;
   const tweakersNumber = calcTweakersNumber(numberOfProducts);
@@ -19,7 +20,7 @@ export async function scrapeMostRecentProducts() {
   for (let indexOfTypes in types) {
     await page.goto(ScrapeLinks[types[indexOfTypes]]);
     for (let indexOfProducts = 1; indexOfProducts <= tweakersNumber; indexOfTypes) {
-      const product = await getProductByTypeAndNumber(page, types[indexOfTypes], indexOfProducts);
+      const product = await getProductByTypeAndNumber(page, types[indexOfTypes].slice(0,-1), indexOfProducts);
       products.push(product);
       if (isNumberOdd(indexOfProducts) || indexOfProducts === 1) {
         indexOfProducts += 2;
@@ -28,6 +29,9 @@ export async function scrapeMostRecentProducts() {
       }
     }
   }
+
+  console.log('Done scraping the most recent products');
+  await importScrapedProducts(products);
 }
 
 export async function scrapeLatestArticles() {
@@ -40,10 +44,9 @@ export async function scrapeLatestArticles() {
     await getLatestArticleFromPcgamer(page),
   ];
 
-  console.log(articles);
 }
 
-async function getProductByTypeAndNumber(page: puppeteer.Page, type: productTypes, number: number) {
+async function getProductByTypeAndNumber(page: puppeteer.Page, type: string, number: number) {
   const [el] = await page.$x(`//*[@id="compareProductListing"]/table/tbody/tr[${number}]/td[1]/a/img`);
   const elItem = await el?.getProperty('src');
   const imgSrc = await elItem?.jsonValue();
