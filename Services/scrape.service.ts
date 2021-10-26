@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer';
-import { productTypes } from '../Enums/productTypes.enum';
-import { ScrapeLinks } from '../Enums/scrapeLinks.enum';
-import Product, { IProduct } from '../Models/product.model';
+import {productTypes} from '../Enums/productTypes.enum';
+import {ScrapeLinks} from '../Enums/scrapeLinks.enum';
+import Product, {IProduct} from '../Models/product.model';
 import Article from '../Models/article.model';
 
 export async function scrapeMostRecentProducts() {
@@ -66,15 +66,13 @@ async function getProductByTypeAndNumber(page: puppeteer.Page, type: productType
   const el4Item = await el4?.getProperty('href');
   const productPage = (await el4Item?.jsonValue()) + '/specificaties/';
 
-  const product = new Product({
+  return new Product({
     type: type,
     name: name,
     image: imgSrc,
     rating: score,
     productPage: productPage,
   });
-
-  return product;
 }
 
 async function getLatestArticleFromGameRant(page: puppeteer.Page) {
@@ -163,8 +161,5 @@ function calcTweakersNumber(number: number): number {
 }
 
 function isNumberOdd(number: number): boolean {
-  if (number % 2 == 0) {
-    return true;
-  }
-  return false;
+  return number % 2 == 0;
 }
